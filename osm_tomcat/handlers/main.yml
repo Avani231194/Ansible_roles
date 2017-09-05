@@ -1,0 +1,14 @@
+---
+
+- name: restart_tomcat_debian
+  service:
+    name: tomcat7
+    state: restarted
+  become: true
+
+- name: start_tomcat_redhat
+  systemd: 
+    name: tomcat 
+    state: started
+    enabled: true
+  become: true

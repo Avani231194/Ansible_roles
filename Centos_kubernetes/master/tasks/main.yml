@@ -1,0 +1,60 @@
+---
+# tasks file for kubernetes_master
+
+- name: Install Kubernetes onto the server
+  yum:
+   name: "{{ item }}"
+   state: present
+  with_items:
+   - flannel
+   - kubernetes
+  become: true
+  tags: download_kubernetes
+
+#- name: copy ETCD configuration file ...
+#  template: 
+#    src: "{{ etcd_config_template }}"
+#    dest: /etc/etcd/etcd.conf
+#  become: true
+
+- name: Copy the kubernetes configuration file from template
+  template:
+    src: "{{ master_config_file }}"
+    dest: /etc/kubernetes/config
+  become: true
+
+- name: Copy the apiserver configuration file for etcd server
+  template:
+    src: "{{ master_api_server_file }}"
+    dest: /etc/kubernetes/apiserver
+    mode: 0755
+  become: true
+  notify: Etcd_started
+
+- name: make a directory using etcdctl
+  shell: "etcdctl mkdir /kube-centos/network"
+  become: true
+  tags: directory_etcd
+
+- name: add vxlan using etcdctl
+  shell: 'etcdctl mk /kube-centos/network/config "{ \"Network\": \"172.30.0.0/16\", \"SubnetLen\": 24, \"Backend\": { \"Type\": \"vxlan\" } }"'
+  become: true
+
+- name: Copy the flanneld configuration file
+  template:
+   src: "{{ flanneld_config_template }}"
+   dest: /etc/sysconfig/flanneld
+  become: true
+
+- name: start the services required
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+   - kube-controller-manager
+   - kube-apiserver
+   - kube-scheduler
+   - ntpd
+   - flanneld
+  become: true

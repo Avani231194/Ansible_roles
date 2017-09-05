@@ -1,0 +1,24 @@
+---
+# tasks file for opstree.awscli
+
+- name: Installing epel Repo...
+  yum: name=epel-release state=present
+
+- name: Installing Epel on centos...
+  get_url:
+    url: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
+    dest: /root/
+
+- name: Installing pip ...
+  yum: pkg=python-pip state=installed
+
+- name: Installing aws cli ...
+  pip: name=awscli state=present
+
+- name: Creating aws directory ...
+  file: path={{ AWS_HOME }}/.aws state=directory
+  sudo: yes
+
+- name: Creating aws config file
+  sudo: yes
+  template: src=aws_credentials dest={{ AWS_HOME }}/.aws/credentials mode=0640

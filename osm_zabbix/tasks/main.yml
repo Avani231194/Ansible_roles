@@ -1,0 +1,17 @@
+---
+
+- name: Fetch OS 
+  include: Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Fetch OS
+  include: Redhat6.yml
+  when:
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version == "6"
+
+- name: Fetch OS
+  include: Redhat7.yml
+  when: 
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version == "7"

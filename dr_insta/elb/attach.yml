@@ -1,0 +1,20 @@
+---
+- hosts: "{{ host_name }}"
+  remote_user: root  
+  serial: 1  
+  post_tasks:  
+    - name: Gathering ec2 facts
+      action: ec2_facts
+    - name: Registering instance back to ELB    
+      local_action: 
+        module: ec2_elb 
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        aws_access_key: AKIAIZB5ZPURHRZQB4CQ
+        aws_secret_key: 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   
+#      instance_id: i-0db4a52644953a5ff       
+        ec2_elbs: app-elb     
+        region: "us-east-1"      
+        state: present      
+        wait: yes      
+        wait_timeout: 300    
+#      with_items: "{{ app-elb }}"

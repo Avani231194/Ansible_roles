@@ -1,0 +1,14 @@
+---
+
+
+- name: Include OS-specific variables.
+  include_vars: "main.yml"
+  tags: include_variables
+
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+  tags: setup_debian
+
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+  tags: setup_redhat

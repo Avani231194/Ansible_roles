@@ -1,0 +1,46 @@
+---
+
+- name: Install the EPEL Repo for NodeJS
+  yum:
+   name: epel-release
+   state: present
+  become: true
+
+
+- name: Install NodeJS for Redhat
+  yum:
+   name: nodejs
+   state: present
+  become: true
+
+- name: check version of NodeJS
+  command: "node --version"
+  register: node_version
+- debug: msg= '{{ node_version.stdout }}'
+
+- name: Install npm for NodeJS
+  yum:
+   name: npm
+   state: present
+  become: true
+
+- name: Get the present working directory
+  command: "pwd"
+  register: nodejs_present_directory_redhat
+
+- name: Copy the http_server file for testing purpose
+  copy:
+   src: http_server.js
+   dest: "{{ nodejs_present_directory_redhat.stdout }}"
+
+
+- name: Install Express JS  package.
+  npm:
+    name: express-generator
+    path: "{{ nodejs_present_directory_redhat.stdout }}"
+
+#- name: Check whether http_server.js runs
+#  shell: "node http_server.js"
+#  register: test_run
+#- debug: msg= "{{ test_run.stdout }}"
+

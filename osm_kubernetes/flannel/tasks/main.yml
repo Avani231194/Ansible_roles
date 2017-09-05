@@ -1,0 +1,48 @@
+---
+
+- name: Installing flannel dependencies ...
+  yum: name={{ item }} state=installed
+  with_items:
+      - flannel
+
+- name: Adding kubernetes apiserver file ...
+  template: src=flannel.j2 dest=/etc/sysconfig/flanneld
+
+- name: Run this command foe network...
+  command: etcdctl --peers=http://master:2379 mk /atomic.io/network/config '{"Network":"172.17.0.0/16"}'
+  when: inventory_hostname == groups['kubernetes'][0]
+  ignore_errors: yes
+
+- name: Restart flannel
+  service: name=flanneld state=started
+
+- name: Bring the docker interface down
+  shell: "ifconfig docker0 down"
+  ignore_errors: yes
+
+
+- name: delete the docker bridge
+  shell: "brctl delbr docker0"
+  ignore_errors: yes
+
+
+- stat: path=/etc/systemd/system/docker.service.d
+  register: docker
+
+- name: Creates directory
+  file: path=/etc/systemd/system/docker.service.d state=directory
+  when: not docker.stat.exists
+
+#- name: Run command for docker down
+#  command: ifconfig docker0 down; brctl delbr docker0
+#  ignore_errors: yes
+
+- name: Adding docker file ...
+  template: src=override.conf.j2 dest=/etc/systemd/system/docker.service.d/override.conf
+
+- name: Run command
+  command: systemctl daemon-reload
+
+- name: statrted docker service
+  service: name=docker state=started
+

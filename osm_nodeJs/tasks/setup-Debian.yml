@@ -1,0 +1,31 @@
+---
+
+#- name: Get the LTS release for NodeJS
+#  shell: "curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -"
+#  become: true
+
+- name: Install NodeJS
+  apt:
+   name: nodejs
+   state: present
+
+- name: Install build essentials
+  apt:
+   name: build-essential
+   state: present
+
+
+- name: Get the present working directory 
+  command: "pwd"
+  register: nodejs_present_directory_debian
+
+- name: Install Express JS  package.
+  npm:
+    name: express-generator
+    path: "{{ nodejs_present_directory_redhat.stdout }}"
+
+- name: Copy the http_server file for testing purpose
+  copy:
+   src: http_server.js
+   dest: "{{ nodejs_present_directory_debian.stdout }}"
+

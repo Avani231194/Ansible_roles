@@ -1,0 +1,56 @@
+---
+- name: checking kibana already installed...
+  stat: path=/etc/kibana
+  register: kibana 
+
+- name: Downloading kibana package ...
+  get_url:
+    url: https://artifacts.elastic.co/downloads/kibana/kibana-5.1.1-x86_64.rpm
+    dest: /root/
+  when: not kibana.stat.exists
+
+
+- name: Installing kibana ...
+  yum:
+    name: kibana-5.1.1-x86_64.rpm
+    state: present
+  when: not kibana.stat.exists
+
+- name: Adding kibana configuration file ...
+  template: src=kibana.yml.j2 dest=/etc/kibana/kibana.yml
+
+- name: Installing Nginx dependencies ...
+  yum: name={{ item }} state=installed
+  with_items:
+      - epel-release
+      - httpd-tools
+
+
+- name: Installing Nginx ...
+  yum: name=nginx state=installed
+
+- name: Adding nginx configuration file ...
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf 
+
+- name: Adding nginx configuration file ...
+  template: src=default.j2 dest=/etc/nginx/conf.d/kibana.conf
+
+ 
+- name: Install passlib (required for writing htpasswd file).
+  yum:
+    name: python-passlib
+    state: present
+
+- name: Create htpasswd file to restrict access to Kibana web interface.
+  htpasswd:
+    name: "{{ elk_kibana_username }}"
+    password: "{{ elk_kibana_password }}"
+    path: /etc/nginx/htpasswd.users
+
+- name: Starting Kibana service
+  service: name=kibana state=started
+
+
+- name: Starting Nginx server
+  service: name=nginx state=started
+

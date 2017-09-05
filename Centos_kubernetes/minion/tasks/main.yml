@@ -1,0 +1,92 @@
+---
+
+- name: Copy the repo to yum.repos.d
+  yum_repository:
+    name: virt7-docker-common-release
+    description: yum repo
+    baseurl: http://cbs.centos.org/repos/virt7-docker-common-release/x86_64/os/
+    gpgcheck: no
+
+- name: Install flannel and Kubernetes onto the server
+  yum:
+   name: "{{ item }}"
+   state: present
+  with_items:
+   - flannel
+   - kubernetes
+  become: true
+  tags: downloads
+
+- name: Copy the kubelet file for all the minions
+  template:
+    src: "{{ minion_kubelet_template }}"
+    dest: /etc/kubernetes/kubelet
+  become: true
+
+- name: Copy the flannel configuration file for etcd server
+  template:
+    src: "{{ flanneld_template }}"
+    dest: /etc/sysconfig/flanneld
+    mode: 0755
+  become: true
+
+- name: Copy the kubernetes configuration file from template
+  template:
+    src: "{{ kubernetes_config_template }}"
+    dest: /etc/kubernetes/config
+  become: true
+
+- name: Install net-tools and bridge-utils to manange docker & flannel
+  yum:
+   name: "{{ item }}"
+   state: present
+  with_items:
+   - bridge-utils
+   - net-tools
+  become: true
+
+
+#- name: make a docker.service.d folder if do not exist already
+#  file:
+#   name: docker.service.d
+#   dest: etc/systemd/system/
+#   state: directory
+#  become: true
+
+#- name: make the docker interface down
+#  shell: "ifconfig docker0 down; brctl delbr docker0"
+#  become: true
+
+#- name: Copy the override.conf file
+#  template:
+#    src: override.conf.j2
+#    dest: etc/systemd/system/docker.service.d/override.conf
+#  become: true
+
+- name: start the services required
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: True
+  become: true
+  with_items:
+   - kube-proxy
+   - kubelet  
+   - flanneld
+   - docker
+
+- name: Configure cluster default
+  shell: "kubectl config set-cluster default-cluster --server=http://master:8080"
+
+- name: Configure context and default user
+  shell: "kubectl config set-context default-context --cluster=default-cluster --user=default-admin"
+
+- name: set default-context
+  shell: "kubectl config use-context default-context"
+
+- name: check the ports
+  shell: "ip addr | grep flannel | grep inet"
+  register: flannel
+- debug: msg='flannel.stdout_lines'
+
+

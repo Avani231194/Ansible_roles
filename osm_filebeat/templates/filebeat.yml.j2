@@ -1,0 +1,17 @@
+---
+  output:
+    logstash:
+      hosts: ["{{ Logstash_server_ip }}:5044"]
+      loadbalance: true
+      index: filebeat
+      worker: 2
+      bulk_max_size: 1024
+  logging: {}
+  filebeat:
+    registry_file: ".filebeat"
+    config_dir: /etc/filebeat/conf.d
+    spool_size: 2048
+    publish_async: false
+    idle_timeout: "5s"
+  runoptions: {}
+  shipper: {}

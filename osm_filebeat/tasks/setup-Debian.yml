@@ -1,0 +1,11 @@
+---
+- name: Ensure dependency is installed (Ubuntu).
+  uri:
+    url: https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-5.5.1-amd64.deb 
+    dest: /tmp/
+    state: present
+ # apt: name=apt-transport-https state=present
+
+- name: Install a .deb package from the internet.
+  apt:
+    deb: /tmp/filebeat-5.5.1-amd64.deb

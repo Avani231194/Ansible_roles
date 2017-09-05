@@ -1,0 +1,7 @@
+---
+- hosts: ubuntu
+  roles:
+    - { role: "php" }
+  remote_user: vagrant
+  become: true
+        

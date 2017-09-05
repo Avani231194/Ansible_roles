@@ -1,0 +1,23 @@
+---
+
+- name: make a group named grafana
+  group:
+    name: grafana
+    state: present
+  become: true
+
+- include: setup-Debian.yml
+  when: ansible_os_family == 'Debian'
+
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: copy grafana.ini file from template to destination
+  template:
+    src: "{{ grafana_template }}"
+    dest: /etc/grafana/grafana.ini
+    owner: root
+    group: grafana
+  become: true
+
+

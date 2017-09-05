@@ -1,0 +1,11 @@
+---
+
+- name: Ubuntu
+  include: Debian.yml
+  when: 
+    - ansible_os_family == "Debian"
+
+- name: CentOS
+  include: Redhat.yml
+  when:
+    - ansible_os_family == "RedHat"

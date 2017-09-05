@@ -1,0 +1,48 @@
+---
+# tasks file for snoopy
+- name: Install snoopy in Ubuntu 
+  apt: 
+     name: snoopy
+     state: latest
+     update_cache: yes
+  when: ansible_os_family== "Debian"
+  
+- name: Downloading Snoopy for Centos
+  get_url:
+     url: http://pkgs.fedoraproject.org/repo/pkgs/snoopy/{{ version }}.tar.gz/7a8186e45d959e1b3ed44805bfcd4467/{{version}}.tar.gz 
+     dest: /opt/
+  when: ansible_distribution == "CentOS"
+
+- name: Unextracting Snoopy Package 
+  unarchive:
+        src: /opt/{{ version}}.tar.gz
+        dest: /opt
+        remote_src: True
+  when: ansible_distribution == "CentOS"
+
+- name: Copying Installing Script
+  template:
+       src: snoopy_install.sh.j2
+       dest: /opt/{{version}}/snoopy_install.sh
+       mode: 755
+  when: ansible_distribution == "CentOS"
+
+- name: Install Dependency for Centos7
+  yum: 
+     name: gcc
+     state: installed 
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+
+- name: Installing in Centos
+  shell: cd /opt/{{version}}/ && ./snoopy_install.sh
+  notify:
+    - restart service
+  when: ansible_distribution == "CentOS" 
+
+- name: Enableing Snoopy to capture all logs in Ubuntu
+  shell: echo "/lib/snoopy.so" >> /etc/ld.so.preload
+  when: ansible_os_family== "Debian"
+  notify:
+    - restart service in ubuntu
+

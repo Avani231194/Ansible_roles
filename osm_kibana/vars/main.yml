@@ -1,0 +1,9 @@
+---
+# vars file for kibana
+
+elk_kibana_username: "admin"
+elk_kibana_password: "admin"
+Elasticsearch_ip: "172.31.14.231"
+Kibana_server_ip: "13.126.60.79"
+#Kibana_server_centos_ip: "192.168.0.97"
+

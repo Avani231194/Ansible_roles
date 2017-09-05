@@ -1,0 +1,16 @@
+---
+# handlers file for snoopy
+- name: restart service
+  service: 
+     name: "{{ item }}" 
+     state: restarted 
+  with_items:
+      - sshd
+
+- name: restart service in ubuntu
+  service:
+     name: "{{ item }}"
+     state: restarted
+  with_items:
+      - ssh
+

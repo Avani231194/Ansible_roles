@@ -1,0 +1,12 @@
+---
+
+- name: Copy script for delete docker if already exist...
+  template: src=dltDocker.sh.j2 dest=/tmp/dltDocker.sh
+
+- name: Run the script...
+  command: bash /tmp/dltDocker.sh
+
+- name: install packages
+  yum: name=docker state=installed
+
+

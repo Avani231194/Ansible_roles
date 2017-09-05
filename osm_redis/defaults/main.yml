@@ -1,0 +1,20 @@
+---
+
+# default variables for redis
+
+master_password: master_password
+slave_password: slave_password
+master_ip: 192.168.33.34
+slave_ip: 192.168.33.35
+tcp_port: 6379
+unix_socket: /var/run/redis/redis.sock
+keepalive_time: 300
+superviserd: systemd
+pidfile_path: /var/run/redis/redis-server.pid
+logfile_path: /var/log/redis/redis-server.log
+database_number: 16
+db_filename: dump.rdb
+working_directory: /var/lib/redis
+lua_time_limit: 5000
+master_redis_template: master_redis.conf.j2
+slave_redis_template: slave_redis.conf.j2

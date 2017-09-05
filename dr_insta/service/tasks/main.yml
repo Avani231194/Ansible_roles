@@ -1,0 +1,16 @@
+---
+- template:
+    src: "{{ item.name }}"
+    dest: /etc/init.d/
+    mode: 755
+#    mode: "{{ item.mode }}"
+  with_items:
+#    - {'templates/config.businessapi.j2','/home/vagrant/config'}
+      - { name: 'admin_python' }
+      - { name: 'business_python' }
+      - { name: 'businessapi' }
+      - { name: 'doctorapi' }
+      - { name: 'userapi' }
+      - { name: 'doctor_python' }
+
+

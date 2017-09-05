@@ -1,0 +1,15 @@
+---
+
+- hosts: node
+
+  roles:
+    - role: elasticsearch_cluster
+      es_etc_node_master: "false"
+      es_etc_node_data: "true"
+
+- hosts: master
+
+  roles:
+    - role: elasticsearch_cluster
+      es_etc_node_master: "true"
+      es_etc_node_data: "false"

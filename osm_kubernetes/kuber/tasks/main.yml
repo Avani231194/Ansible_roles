@@ -1,0 +1,21 @@
+---
+
+- name: Installing flannel dependencies ...
+  yum: name={{ item }} state=installed
+  with_items:
+      - kubernetes
+      - bridge-utils
+
+- name: Adding kubernetes apiserver file ...
+  template: src=kubelet.j2 dest=/etc/kubernetes/kubelet
+
+
+- name: Adding kubernetes apiserver file ...
+  template: src=config.j2 dest=/etc/kubernetes/config
+
+- name: Restarting  kubelet
+  service: name=kubelet state=restarted
+
+- name: Restarting  kubeproxy
+  service: name=kube-proxy state=restarted
+

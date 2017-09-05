@@ -1,0 +1,2 @@
+[app]
+172.0.7.243  ansible_user=root ansible_become=yes

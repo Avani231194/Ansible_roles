@@ -1,0 +1,31 @@
+---
+# tasks file for deploy.stage
+
+#- name: Deploying latest code to stage
+#  shell: git pull
+- command: su - {{ app }}
+- command: git clone gitolite3:{{ app }}
+  args:
+   chdir: /home/{{ app }}/{{ app }}
+ #  chdir: /home/app_name/new
+
+- name: Providing corect ownerships
+  file: path=/home/{{ app }}/new owner={{ app }} group={{ app }} recurse=yes
+
+#- name: Providing corect ownerships
+#  file: path=/home/{{ app_name }}/{{ app_name }} owner={{ app_name }} group={{ app_name }} recurse=yes
+#- name: Cloning latest code for {{app_name}}
+#  local_action: shell git clone  {{app_git_url}} chdir=/var/lib/jenkins/static/ warn=no
+
+#- name: Syncing new code to runing code
+#  synchronize:
+#    src: /var/lib/jenkins/static/{{app_name}}/
+#    dest: /home/{{app_name}}/{{app_name}}/
+#
+#- name: Setting ownership for latest code
+#  file: path=/home/{{app_name}}/{{app_name}} owner={{app_name}} group={{app_name}} recurse=yes
+
+#- command: su - {{app_name}}
+#- name: Creating Backup of the latest running code in prod
+#  command: cp -rf /home/{{app_name}}/{{app_name}} /home/{{app_name}}/{{app_name}}.bak warn=no
+

@@ -1,0 +1,5 @@
+[virt7-docker-common-release]
+name=docker1.12.6
+baseurl=http://mirror.centos.org/centos/7/extras/x86_64/Packages/docker-common-1.12.6-32.git88a4867.el7.centos.x86_64.rpm
+enabled=1
+gpgcheck=0

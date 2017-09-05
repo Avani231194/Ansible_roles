@@ -1,0 +1,67 @@
+---
+
+- name:  Add key for kibana
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch 
+    state: present
+
+- name: Installing dependencies ...
+  apt: name={{ item }} state=installed
+  with_items:
+      - apt-transport-https
+
+- name: Add Kibana repository...
+  apt_repository:
+    repo: 'deb https://artifacts.elastic.co/packages/5.x/apt stable main'
+    state: present
+#  ignore_errors: yes
+
+- name: Update cache...
+  apt:
+    update_cache: yes
+
+
+- stat: path=/etc/kibana
+  register: kibana
+
+- name: Installing Kibana
+  apt: name=kibana state=installed
+  when: not kibana.stat.exists
+
+- name: Installing Kibana and Nginx dependencies ...
+  apt: name={{ item }} state=installed
+  with_items:
+      - nginx
+      - apache2-utils
+
+
+- name: Starting Kibana service...
+  service: name=kibana state=started
+
+- name: Install passlib (required for writing htpasswd file)...
+  apt:
+    name: python-passlib
+    state: present
+
+- name: Remove old files...
+  file: path=/etc/nginx/sites-available/default state=absent
+
+- name: Create htpasswd file to restrict access to Kibana web interface...
+  htpasswd:
+    name: "{{ elk_kibana_username }}"
+    password: "{{ elk_kibana_password }}"
+    path: /etc/nginx/htpasswd.users
+  
+- name: Adding Nginx configuration file ...
+  template: src=kibana.yml.j2 dest=/etc/kibana/kibana.yml
+
+- name: Adding Nginx configuration file ...
+  template: src=default.j2 dest=/etc/nginx/sites-available/default
+
+- name: Starting Kibana service...
+  service: name=kibana state=started
+
+
+- name: Starting Nginx server
+  service: name=nginx state=started
+

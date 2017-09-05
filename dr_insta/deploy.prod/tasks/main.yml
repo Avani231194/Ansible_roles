@@ -1,0 +1,72 @@
+---
+
+#- name: pass the variable
+#  vars:
+#    app: doctorapi
+#    app: businessapi
+# Deployment task for doctorinsta
+- name: Cleaning Old Backup ...
+  command: rm -rf /home/{{app_name}}/{{app_name}}.bak warn=no
+
+- name: Creating Backup of the latest running code in prod
+  command: mv  /home/{{app_name}}/{{app_name}} /home/{{app_name}}/{{app_name}}.bak warn=no
+
+- name: Changing Ownership of backup
+  file: path=/home/{{app_name}}/{{app_name}}.bak owner={{app_name}} group={{app_name}} recurse=yes
+
+- name: Cloning latest code for {{app_name}}
+#  local_action: shell git clone --depth=1 {{app_name_git_url}} chdir= /home/{{app_name}}/ warn=no
+  command: git clone gitolite3:{{app_name}}
+  become: yes
+  become_user: "{{ app_name }}"
+
+- name: Create virtual env for {{app_name}}
+  command: virtualenv env chdir=/home/{{ app_name }}/{{ app_name }}
+  become: yes 
+  become_user: "{{ app_name }}"
+#- action: skip
+#  only_if: "{{ app_name }}"  != 'webapp_name_angular'
+
+  tags:
+    - webapp_name_angular
+    - doctorinsta-front
+#  when: 
+#    - webapp_name_angular
+#    - doctorinsta-front
+#  when: doctorinsta-front
+#  with_items:
+#      - webapp_name_angular      
+
+- name: Installing required python packages in virtualenv 
+  pip:    
+    requirements: /home/{{ app_name }}/{{ app_name }}/requirements.txt    
+    virtualenv: /home/{{ app_name }}/{{ app_name }}/env 
+  become: yes  
+  become_user: "{{ app_name }}"
+#  when:
+#    - webapp_name_angular 
+#    - doctorinsta-front
+#  when: doctorinsta-front
+  tags:
+    - webapp_name_angular
+    - doctorinsta-front
+#- name: Syncing new code to runing code
+#  synchronize:
+#    src: /home/{{app_name}}/{{app_name}}.bak
+#    dest: /home/{{app_name}}/{{app_name}}/
+
+- name: Setting ownership for latest code 
+  file: path=/home/{{app_name}}/{{app_name}} owner={{app_name}} group={{app_name}} recurse=yes
+
+- file: path=/home/{{app_name}}/{{app_name}} mode=0777 recurse=yes
+  when: app_name=="userapi"
+
+- name: Starting {{app_name}}
+  service: name={{app_name}} state=started
+  tags:
+    - webapp_name_angular
+    - doctorinsta-front
+#  when:
+#    - webapp_name_angular
+#    - doctorinsta-front
+

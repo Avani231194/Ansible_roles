@@ -1,0 +1,16 @@
+---
+# handlers file for Postgresql
+
+- name: Start Postgresql in Debian
+  service:
+     name: postgresql
+     state: started
+     enabled: yes
+
+- name: Start postgresql in centos
+  service:
+     name: postgresql-9.6
+     state: started 
+     enabled: yes
+
+

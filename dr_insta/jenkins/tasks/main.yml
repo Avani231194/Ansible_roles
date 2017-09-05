@@ -1,0 +1,124 @@
+---
+# Variable setup.
+
+#- include: plugins.yml
+#- name: Include OS-Specific variables
+#  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Define jenkins_repo_url
+  set_fact:
+    jenkins_repo_url: "{{ __jenkins_repo_url }}"
+  when: jenkins_repo_url is not defined
+
+- name: Define jenkins_repo_key_url
+  set_fact:
+    jenkins_repo_key_url: "{{ __jenkins_repo_key_url }}"
+  when: jenkins_repo_key_url is not defined
+
+- name: Define jenkins_pkg_url
+  set_fact:
+    jenkins_pkg_url: "{{ __jenkins_pkg_url }}"
+  when: jenkins_pkg_url is not defined
+
+
+
+# set javac path 
+#- name: setup link of javac to /etc/alternatives
+#  file: 
+#    src: /opt/jdk1.8.0_05/bin/javac  
+#    dest: /etc/alternatives/javac 
+#    state: link
+
+#- name: setup javac path 
+#  file: 
+#    src: /etc/alternatives/javac  
+#    dest: /bin/javac 
+#    state: link
+
+
+
+# Setup/install tasks.
+- include: setup-RedHat.yml
+  when: ansible_os_family == 'RedHat'
+
+#- include: setup-Debian.yml
+#  when: ansible_os_family == 'Debian'
+
+# Configure Jenkins init settings.
+- include: settings.yml
+
+# Make sure Jenkins starts, then configure Jenkins.
+- name: Ensure Jenkins is started and runs on startup.
+  service: name=jenkins state=started enabled=yes
+
+- name: Wait for Jenkins to start up before proceeding.
+  shell: "curl -D - --silent --max-time 5 http://{{ jenkins_hostname }}:{{ jenkins_http_port }}{{ jenkins_url_prefix }}/cli/"
+  register: result
+  until: (result.stdout.find("403 Forbidden") != -1) or (result.stdout.find("200 OK") != -1) and (result.stdout.find("Please wait while") == -1)
+  retries: "{{ jenkins_connection_retries }}"
+  delay: "{{ jenkins_connection_delay }}"
+  changed_when: false
+  check_mode: no
+
+- name: Get the jenkins-cli jarfile from the Jenkins server.
+  get_url:
+    url: "http://{{ jenkins_hostname }}:{{ jenkins_http_port }}{{ jenkins_url_prefix }}/jnlpJars/jenkins-cli.jar"
+    dest: "{{ jenkins_jar_location }}"
+  register: jarfile_get
+  until: "'OK' in jarfile_get.msg or 'file already exists' in jarfile_get.msg"
+  retries: 5
+  delay: 10
+  check_mode: no
+
+
+#- name: Remove Jenkins security init scripts after first startup.
+#  file:
+#    path: "{{ jenkins_home }}/init.groovy.d/created-seed-job.groovy"
+#    state: absent
+
+# Update Jenkins and install configured plugins.
+- include: plugins.yml
+
+# Install external plugin using jpi and hpi files
+#- name: copy scriptler plugin
+#  copy:
+#    src: scriptler-2.7.hpi
+#    dest: /var/lib/jenkins/plugins/
+
+#- name: copy uno-choice plugin
+#  copy:
+#    src: uno-choice.jpi 
+#    dest: /var/lib/jenkins/plugins/ 
+
+
+- name: Disable Script Authentication by groovy. 
+  template:
+    src: disableScriptApproval.groovy.j2
+    dest: /var/lib/jenkins/init.groovy.d/disableScriptApproval.groovy
+
+
+- name: Create seed job.
+  template:
+    src: create-seed-job.groovy.j2
+    dest: /var/lib/jenkins/init.groovy.d/create-seed-job.groovy
+
+#- name: Install gradle in jenkins
+#  template:
+#    src: hudson.plugins.gradle.Gradle.xml.j2
+#    dest: /var/lib/jenkins/hudson.plugins.gradle.Gradle.xml
+
+#- name: Install groovy in jenkins
+#  template:
+#    src: hudson.plugins.groovy.Groovy.xml.j2
+#    dest: /var/lib/jenkins/hudson.plugins.groovy.Groovy.xml
+
+#- name: Creates scrips dir
+#  file: 
+#   path: /var/lib/jenkins/scripts 
+#   state: directory
+
+#- name: Copy all scripts into jenkins
+#  copy: 
+#    src: scripts/
+#    dest: /var/lib/jenkins/scripts/ # remote_src=yes directory_mode=yes
+

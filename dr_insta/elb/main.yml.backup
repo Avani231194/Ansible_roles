@@ -1,0 +1,54 @@
+---
+- hosts: dev-webserver1 
+  remote_user: root  
+  serial: 1 
+  vars:
+    - app_name:
+      - ['businessapi']
+      - ['doctorapi']
+#  vars: 
+#    app_name: businessapi
+#    appname: doctorapi
+  pre_tasks:    
+    - name: Gathering ec2 facts      
+      action: ec2_facts    
+    - name: De-register Instance from ELB to perform deployment      
+      local_action:        
+        module: ec2_elb
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        aws_access_key: AKIAIZB5ZPURHRZQB4CQ       
+        aws_secret_key: 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      
+  #      instance_id: i-0db4a52644953a5ff     
+        region: "us-east-1"        
+        state: absent  
+
+    - name: Pass variables to role
+      include_role:
+        name: deploy.prod
+      when: app_name == 'doctorapi'
+
+    - name: Pass variables to role
+      include_role:
+        name: deploy.prod
+      when: app_name == 'businessapi'
+#  roles:
+#    - { role: deploy, when: app == 'businessapi' }
+
+
+
+
+  post_tasks:  
+    - name: Gathering ec2 facts
+      action: ec2_facts
+    - name: Registering instance back to ELB    
+      local_action: 
+        module: ec2_elb 
+        instance_id: "{{ ansible_ec2_instance_id }}"
+        aws_access_key: AKIAIZB5ZPURHRZQB4CQ
+        aws_secret_key: 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   
+#      instance_id: i-0db4a52644953a5ff       
+        ec2_elbs: app-elb     
+        region: "us-east-1"      
+        state: present      
+        wait: yes      
+        wait_timeout: 300 

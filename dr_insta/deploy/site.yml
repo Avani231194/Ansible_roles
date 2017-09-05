@@ -1,0 +1,4 @@
+---
+- hosts: dev-webserver1
+  roles:
+    - { role: "deploy.prod" }

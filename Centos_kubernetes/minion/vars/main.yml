@@ -1,0 +1,7 @@
+---
+#master_ip: master_ip: "{{ hostvars[groups['master'][0]]['ansible_eth1']['ipv4']['address'] }}"
+#minion_ip: '{{ ansible_eth1["ipv4"]["address"] }}'
+
+master_hostname: master
+minion_hostname: minion
+

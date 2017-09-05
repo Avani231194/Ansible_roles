@@ -1,0 +1,34 @@
+#!/bin/sh
+SERVICE_NAME=doctorapi
+
+case $1 in
+      start)
+         echo "Starting $SERVICE_NAME....."
+        cd /home/doctorapi/doctorapi/
+        source /home/doctorapi/doctorapi/env/bin/activate
+        nohup python /home/doctorapi/doctorapi/manage.py runserver 0.0.0.0:8200 &
+        echo -ne '\n'| echo "Service is Running"
+        echo -ne '\n'| echo "Completed"
+   exit 0
+    ;;
+
+      stop)
+         echo -e "Stopping process pid `ps -ef | grep "python /home/doctorapi/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/doctorapi/doctorapi/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        echo "Stoping $SERVICE_NAME"
+      ;;
+
+     restart)
+
+        echo "Stop doctorapi"
+        echo -e "Stopping process pid `ps -ef | grep "python /home/doctorapi/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/doctorapi/doctorapi/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        cd /home/doctorapi/doctorapi/
+        source /home/doctorapi/doctorapi/env/bin/activate
+        echo -e "Starting doctorapi"
+        nohup python /home/doctorapi/doctorapi/manage.py runserver 0.0.0.0:8200 &
+        echo -ne '\n'| echo "Restarting"
+        echo -ne '\n'| echo "Completed"
+     ;;
+esac
+

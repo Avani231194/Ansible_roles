@@ -1,0 +1,9 @@
+---
+# handlers file for kubernetes_master
+
+- name: Etcd_started
+  systemd:
+    name: etcd
+    state: started
+    enabled: true
+  become: true

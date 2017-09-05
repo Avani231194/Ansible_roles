@@ -1,0 +1,7 @@
+---
+# vars file for etcd
+master_ip: "192.168.33.108"
+minion_ip: "192.168.33.42"
+master_hostname: "master"
+minion_hostname: "minion"
+

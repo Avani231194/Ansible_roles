@@ -1,0 +1,99 @@
+---
+# check whether java is installed
+- name: determine if Java is already installed
+  shell: which java
+  register: java_task_installed
+  failed_when: no
+  
+- name: Add the ppa repo for Java 7
+  apt_repository:
+    repo: ppa:openjdk-r/ppa
+    state: present
+  become: true
+
+# Update Cache of the System
+- name: Update Cache
+  become: true
+  apt:
+   update_cache: yes
+   cache_valid_time: 84600
+   dpkg_options: 'force-confold,force-confdef'
+  tags: update_cache
+
+# Install Java Kit
+- name: Ensure Java Development Kit is Installed
+  become: true
+  apt: name=openjdk-7-jdk state=present
+  tags: java_installation
+
+# make a tomcat group
+- name: make a tomcat group
+  group:
+    name: tomcat
+    state: present
+  become: true 
+  tags: tomcat_group
+
+- name: make a tomcat user if not present already and make it owner of tomcat group 
+  user:
+    name=tomcat
+    shell=/bin/bash
+    groups=tomcat
+    append=yes
+  tags: tomcat_user
+  
+# get Java Home path 
+- name: get the JAVA_HOME path
+  shell: sudo update-java-alternatives -l | awk '{print $3}'
+  register: JAVA_HOME
+  tags: getting_java_home
+
+- name: Install tomcat on the server
+  apt:
+   name: tomcat7
+   state: present
+  become: true
+
+- name: Add the Java Opts into the tomcat.conf file
+  lineinfile:
+    path: /etc/default/tomcat7
+    line: 'JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC"'
+    state: present
+  become: true
+
+- name: Install additional packages
+  apt:
+   name: "{{ item }}"
+   state: present
+  become: true
+  with_items:
+   - tomcat7-docs
+   - tomcat7-admin
+   - tomcat7-examples
+ 
+# copy tomcat server.xml file
+- name: copy the tomcat server file
+  template: 
+    src: "{{ server }}"
+    dest: /etc/tomcat7/  
+    owner: tomcat  
+    group: tomcat 
+  become: true
+  tags: copying_server_xml
+
+# copy tomcat user.xml file
+- name: copy the tomcat users file
+  template: 
+    src: "{{ tomcat_users }}" 
+    dest: /etc/tomcat7/  
+    owner: tomcat  
+    group: tomcat
+  become: true
+  tags: copying_user_xml
+
+- name: start tomcat7 on server
+  service:
+    name: tomcat7
+    state: started
+    enabled: true
+  become: true

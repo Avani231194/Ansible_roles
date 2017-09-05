@@ -1,0 +1,36 @@
+---
+
+- group:
+    name: "{{ item }}"
+    state: present
+  with_items:
+     - "userapi"
+     - "businessapi"
+     - "doctorinsta-front"
+     - "webapp_angular"
+     - "admin_python"
+     - "business_python"
+     - "doctor_python"
+     - "webuser"
+     - "doctorapi"
+
+
+- name: add several users
+  user:
+    name: "{{ item.name }}"
+    home: "/home/{{ item.name }}"
+    state: present
+    groups: "{{ item.groups }}"
+  with_items:
+    - { name: 'businessapi', groups: 'businessapi' }
+    - { name: 'doctorinsta-front', groups: 'doctorinsta-front' }
+    - { name: 'userapi', groups: 'userapi' }
+    - { name: 'webapp_angular', groups: 'webapp_angular' }
+    - { name: 'admin_python', groups: 'admin_python' }
+    - { name: 'business_python', groups: 'business_python' }
+    - { name: 'doctor_python', groups: 'doctor_python' }
+    - { name: 'webuser', groups: 'webuser' }
+    - { name: 'doctorapi', groups: 'doctorapi' }
+
+ 
+

@@ -1,0 +1,38 @@
+---
+# defaults file for osm_haproxy
+
+# haproxy settings.
+haproxyUser: haproxy
+haproxyGroup: haproxy
+
+# Frontend settings.
+haproxyFrontendName: 'main'
+haproxyFrontendPort: "8090"
+bindPort: '443'
+backend: "app"	
+
+# stats settings.
+statsPort: "5000"
+statsAdminUser: "admin"
+statsAdminPassword: "opstree@123"
+statsURI: "/haproxy_stats"
+
+# Backend settings.
+
+sslCertPath: "sslCertPath"
+loadBalancingAlgorithm: "roundrobin"
+healthCheckProto: "HTTPS"
+healthCheckPort: "8443"
+modeVar: "http"
+
+# Backend servers.
+appName1: "server1"
+host1: "192.168.0.54"
+appName2: "server2"
+host2: "192.168.0.99"
+appName3: "server3"
+host3: "192.169.0.88"
+hostPort1: "8443"
+healthCheckInterval: "12000"
+fallValue: "7"
+riseValue: "2"

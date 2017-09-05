@@ -1,0 +1,100 @@
+---
+- name: Config file for mysql
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+  when: inventory_hostname == groups['mysql-master'][0]
+
+- name: Config file for mysql
+  template:
+    src: my.cnf1.j2
+    dest: /etc/my.cnf
+  when: inventory_hostname == groups['mysql-slave'][0]
+
+- name: Starting mysql
+  service: name=mysqld state=restarted
+
+
+- name: Create database user
+  mysql_user: user={{ user_name }} password={{ password }} priv=*.*:ALL state=present
+
+
+- name: Create database
+  mysql_db: db={{ master_db_name }} state=present
+
+- name: Mysql Configuration
+  command: 'mysql -e "{{ item }}"'
+  with_items:
+    - grant replication slave on *.* to '{{ user_name }}'@'%';
+    - update mysql.user set Repl_client_priv='Y' where user= '{{ user_name }}';
+    - FLUSH PRIVILEGES;
+ 
+
+- name: Config file for mysql
+  template:
+    src: sql.sh.j2
+    dest: /root/sql.sh
+  when: inventory_hostname == groups['mysql-master'][0]
+    
+- name: run the script
+  command: bash /root/sql.sh 	
+  when: inventory_hostname == groups['mysql-master'][0]
+
+- name: copy a file from remote server
+  fetch:
+    src: /root/mysqloutput
+    dest: /etc/ansible/roles/mysql-replication/mysql-replication/templates/mysqloutput.j2
+    flat: yes
+  when: inventory_hostname == groups['mysql-master'][0]
+
+
+##################
+
+#- name: Config file for mysql
+#  template:
+#    src: my.cnf1.j2
+#    dest: /etc/my.cnf
+#  when: inventory_hostname == groups['mysql-replication'][1]
+
+#- name: Starting mysql
+#  service: name=mysqld state=restarted
+
+#- name: Config file for mysql
+#  template:
+#    src: mysqloutput.j2
+#    dest: /tmp/mysqloutput
+
+
+- name: Grep the value of mysql_log_file
+  shell: grep 'mysql' /root/mysqloutput | awk '{print $1}'
+  when: inventory_hostname == groups['mysql-master'][0]
+  register: master_log_file
+
+
+- name: Grep the position of mysql log
+  shell: grep 'mysql' /root/mysqloutput | awk '{print $2}'
+  when: inventory_hostname == groups['mysql-master'][0]
+  register: master_log_pos
+
+- name: Create database user
+  mysql_user: user={{ user_name }} password={{ password }} priv=*.*:ALL state=present
+
+
+- name: Create database
+  mysql_db: db={{ master_db_name }} state=present
+
+- name: Mysql Configuration
+  command: 'mysql -e "{{ item }}"'
+  with_items:
+    - grant replication slave on *.* to '{{ user_name }}'@'%';
+    - update mysql.user set Repl_client_priv='Y' where user= '{{ user_name }}';
+    - FLUSH PRIVILEGES;
+
+
+- name: Mysql Configuration
+  command: 'mysql -e "{{ item }}"'
+  with_items:
+    - STOP SLAVE;
+    - CHANGE MASTER TO MASTER_HOST = '{{ master_ip }}', MASTER_USER = '{{ user_name }}', MASTER_PASSWORD = '{{ password }}', MASTER_LOG_FILE = '{{ master_log_file.stdout }}', MASTER_LOG_POS = {{ master_log_pos.stdout }};
+    - START SLAVE;
+  when: inventory_hostname == groups['mysql-slave'][0]  

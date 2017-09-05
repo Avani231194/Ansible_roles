@@ -1,0 +1,19 @@
+---
+- name: Start database
+  service: name=mysqld state=started
+  become: true
+
+- name: Restart database
+  service: name=mysqld state=restarted
+  become: true
+
+- name: Restart apache
+  service: name=httpd state=restarted
+  become: true
+
+- name: zabbix-server restart
+  service: name=zabbix-server state=restarted
+  become: true
+
+- name: zabbix-agent restart
+  service: name=zabbix-agent state=started

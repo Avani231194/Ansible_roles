@@ -1,0 +1,13 @@
+---
+# tasks file for etcd
+
+
+- name: install packages
+  yum: name=etcd state=installed
+
+- name: Adding ETCD configuration file ...
+  template: src=etcd.conf.j2 dest=/etc/etcd/etcd.conf
+  notify: Etcd started
+
+
+

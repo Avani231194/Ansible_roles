@@ -1,0 +1,5 @@
+---
+# handlers file for etcd
+
+- name: Etcd started
+  service: name=etcd state=started

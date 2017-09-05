@@ -1,0 +1,8 @@
+---
+
+
+- hosts: zabbix
+  tasks:
+    - include: tasks/zabbix_agent.yml hostname=zabbix-agent zabbix_server_ip=127.0.0.1
+    
+ 

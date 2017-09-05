@@ -1,0 +1,11 @@
+---
+- hosts: replication_servers
+  roles:
+    - { role: "osm_mongo" }
+  remote_user: root
+
+- hosts: mongoPrimary
+  roles:
+    - { role: mongoreplication }
+  remote_user: root
+

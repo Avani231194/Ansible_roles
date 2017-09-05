@@ -1,0 +1,40 @@
+---
+# tasks file for post_config
+
+- name: Install net-tools
+  yum:
+   name: net-tools
+   state: present
+  become: true
+
+- name: Bring the docker interface down
+  shell: "ifconfig docker0 down"
+  become: true
+
+- name: delete the docker bridge
+  shell: "brctl delbr docker0"
+  become: true
+
+- name: make a directory inside /etc/systemd/system to override the network settings
+  file:
+   path: /etc/systemd/system/docker.service.d
+   state: directory
+   owner: root
+   mode: 0775
+  become: true
+
+
+- name: copy the override.conf template
+  template:
+    src: "{{ override_template }}"
+    dest: /etc/systemd/system/docker.service.d/override.conf
+    owner: root
+    mode: 0775
+  become: true
+
+- name: reload the docker service
+  systemd:
+    name: docker
+    daemon_reload: yes
+    state: restarted
+  become: true

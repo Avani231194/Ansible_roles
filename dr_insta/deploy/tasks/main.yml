@@ -1,0 +1,67 @@
+---
+# Deployment task for doctorinsta
+- name: Cleaning Old Backup ...
+  command: rm -rf /home/{{app}}/{{app}}.bak warn=no
+
+- name: Creating Backup of the latest running code in prod
+  command: mv  /home/{{app}}/{{app}} /home/{{app}}/{{app}}.bak warn=no
+
+- name: Changing Ownership of backup
+  file: path=/home/{{app}}/{{app}}.bak owner={{app}} group={{app}} recurse=yes
+
+- name: Cloning latest code for {{app}}
+#  local_action: shell git clone --depth=1 {{app_git_url}} chdir= /home/{{app}}/ warn=no
+  command: git clone gitolite3:{{app}}
+  become: yes
+  become_user: "{{ app }}"
+
+- name: Create virtual env for {{app}}
+  command: virtualenv env chdir=/home/{{ app }}/{{ app }}
+  become: yes 
+  become_user: "{{ app }}"
+#- action: skip
+#  only_if: "{{ app }}"  != 'webapp_angular'
+
+  tags:
+    - webapp_angular
+    - doctorinsta-front
+#  when: 
+#    - webapp_angular
+#    - doctorinsta-front
+#  when: doctorinsta-front
+#  with_items:
+#      - webapp_angular      
+
+- name: Installing required python packages in virtualenv 
+  pip:    
+    requirements: /home/{{ app }}/{{ app }}/requirements.txt    
+    virtualenv: /home/{{ app }}/{{ app }}/env 
+  become: yes  
+  become_user: "{{ app }}"
+#  when:
+#    - webapp_angular 
+#    - doctorinsta-front
+#  when: doctorinsta-front
+  tags:
+    - webapp_angular
+    - doctorinsta-front
+#- name: Syncing new code to runing code
+#  synchronize:
+#    src: /home/{{app}}/{{app}}.bak
+#    dest: /home/{{app}}/{{app}}/
+
+- name: Setting ownership for latest code 
+  file: path=/home/{{app}}/{{app}} owner={{app}} group={{app}} recurse=yes
+
+- file: path=/home/{{app}}/{{app}} mode=0777 recurse=yes
+  when: app=="userapi"
+
+- name: Starting {{app}}
+  service: name={{app}} state=started
+  tags:
+    - webapp_angular
+    - doctorinsta-front
+#  when:
+#    - webapp_angular
+#    - doctorinsta-front
+

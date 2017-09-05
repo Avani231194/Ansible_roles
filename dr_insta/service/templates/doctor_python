@@ -1,0 +1,34 @@
+#!/bin/sh
+SERVICE_NAME=doctor_python
+
+case $1 in
+      start)
+         echo "Starting $SERVICE_NAME....."
+        cd /home/doctor_python/doctor_python/
+        source /home/doctor_python/doctor_python/env/bin/activate
+        nohup python /home/doctor_python/doctor_python/manage.py runserver 0.0.0.0:8500 &
+        echo -ne '\n'| echo "Service is Running"
+        echo -ne '\n'| echo "Completed"
+   exit 0
+    ;;
+
+      stop)
+        echo -e "Stopping process pid `ps -ef | grep "python /home/doctor_python/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/doctor_python/doctor_python/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        echo "Stoping $SERVICE_NAME"
+      ;;
+
+     restart)
+
+        echo "Stop doctor_python"
+        echo -e "Stopping process pid `ps -ef | grep "python /home/doctor_python/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/doctor_python/doctor_python/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        cd /home/doctor_python/doctor_python/
+        source /home/doctor_python/doctor_python/env/bin/activate
+        echo -e "Starting doctor_python"
+        nohup python /home/doctor_python/doctor_python/manage.py runserver 0.0.0.0:8500 &
+        echo -ne '\n'| echo "Restarting"
+        echo -ne '\n'| echo "Completed"
+     ;;
+esac
+

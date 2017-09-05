@@ -1,0 +1,46 @@
+---
+
+- name: add the repository for redis server
+  apt_repository:
+    repo: ppa:chris-lea/redis-server
+    state: present
+  become: true
+
+- name: update cache
+  apt:
+   update_cache: yes
+   cache_valid_time: 887000
+  become: true
+
+- name: Install redis server
+  apt:
+   name: redis-server
+   state: present
+  become: true
+
+- name: Copy the Master Configuration file into the master server
+  template:
+    src: "{{ master_redis_template }}"
+    dest: /etc/redis/redis.conf
+  become: true
+  when: inventory_hostname == groups['nodes'][0]
+
+- name: Copy the Slave Configuration file into the slaves
+  template:
+    src: "{{ slave_redis_template }}"
+    dest: /etc/redis/redis.conf
+  become: true
+  when: inventory_hostname != groups['nodes'][0]
+  
+
+- name: start the redis server on Debian
+  service:
+    name: redis-server
+    state: started
+    enabled: true
+  become: true
+  when: ansible_os_family == 'Debian'
+
+#- name: check if redis is running.
+#  shell: "redis-benchmark -q -n 1000 -c 10 -P 5"
+#  register: redis_status

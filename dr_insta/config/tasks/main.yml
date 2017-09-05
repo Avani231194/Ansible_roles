@@ -1,0 +1,15 @@
+---
+- template:
+    src: "{{ item.name }}"
+    dest: "{{ item.path }}"
+#    mode: "{{ item.mode }}"
+  with_items:
+#    - {'templates/config.businessapi.j2','/home/vagrant/config'}
+      - { name: 'config.businessapi.j2', path: '/home/businessapi/.ssh/config' }
+      - { name: 'config.doctorapi.j2', path: '/home/doctorapi/.ssh/config' }
+      - { name: 'config.doctorinsta-front.j2', path: '/home/doctorinsta-front/.ssh/config' }
+      - { name: 'config.admin.j2', path: '/home/admin_python/.ssh/config' }
+      - { name: 'config.business_python.j2', path: '/home/business_python/.ssh/config' }
+      - { name: 'config.doctor_python.j2', path: '/home/doctor_python/.ssh/config' }
+      - { name: 'config.userapi.j2', path: '/home/userapi/.ssh/config' }
+      - { name: 'config.webapp_angular.j2', path: '/home/webapp_angular/.ssh/config' }

@@ -1,0 +1,25 @@
+
+---
+
+dependencies: []
+
+galaxy_info:
+  author: ravi
+  description: Tomcat for Linux
+  license: 
+  min_ansible_version: 1.4
+  platforms:
+  - name: Debian
+    versions:
+    - jessie
+    - wheezy
+  - name: EL
+    versions:
+    - 8
+  - name: Ubuntu
+    versions:
+    - precise
+    - trusty
+  categories:
+    - system
+    - web

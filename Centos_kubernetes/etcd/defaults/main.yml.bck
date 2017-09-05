@@ -1,0 +1,4 @@
+---
+# defaults file for etcd
+etcd_client_legacy_port: 2379
+etcd_peer_legacy_port: 2381

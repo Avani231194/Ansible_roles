@@ -1,0 +1,6 @@
+---
+#user: {{ item }}
+#with_items: 
+#   - admin_python
+#   - doctor_python
+

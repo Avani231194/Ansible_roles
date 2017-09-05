@@ -1,0 +1,12 @@
+- name: Setting Password Authentication
+  copy:
+    src: /etc/ansible/roles/ssh/files/sshd_config_centos
+    dest: /etc/ssh/sshd_config
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Restart SSH service
+  service:
+    name: sshd
+    state: restarted

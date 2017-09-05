@@ -1,0 +1,36 @@
+#!/bin/sh
+SERVICE_NAME=userapi
+
+case $1 in
+      start)
+         echo "Starting $SERVICE_NAME....."
+        cd /home/userapi/userapi/
+        source /home/userapi/userapi/env/bin/activate
+        nohup python /home/userapi/userapi/manage.py runserver 0.0.0.0:8300 &
+        echo -ne '\n'| echo "Service is Running"
+        echo -ne '\n'| echo "Completed"
+
+
+   exit 0
+    ;;
+
+      stop)
+        echo -e "Stopping process pid `ps -ef | grep "python /home/userapi/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/userapi/userapi/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        echo "Stoping $SERVICE_NAME"
+      ;;
+
+     restart)
+
+        echo "Stop userapi"
+        echo -e "Stopping process pid `ps -ef | grep "python /home/userapi/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/userapi/userapi/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        cd /home/userapi/userapi/
+        source /home/userapi/userapi/env/bin/activate
+        echo -e "Starting userapi"
+        nohup python /home/userapi/userapi/manage.py runserver 0.0.0.0:8300 &
+        echo -ne '\n'| echo "Restarting"
+        echo -ne '\n'| echo "Completed"
+     ;;
+esac
+

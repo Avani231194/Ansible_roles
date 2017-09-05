@@ -1,0 +1,17 @@
+---
+- hosts: server
+  roles:
+    - role: docker
+    - role: etcd
+
+- hosts: master  
+  roles:
+    - role: master
+
+- hosts: minion
+  roles:
+    - role: minion
+
+- hosts: server
+  roles:
+    - role: post_config

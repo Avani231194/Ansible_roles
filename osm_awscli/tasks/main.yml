@@ -1,0 +1,10 @@
+---
+# tasks file for awscli
+
+- name: Fetch OS 
+  include: Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Fetch OS
+  include: Redhat.yml
+  when: ansible_os_family == "RedHat"

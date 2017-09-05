@@ -1,0 +1,54 @@
+---
+- name: Check if docker is already installed.
+  stat: path=/etc/docker
+  register: dockerInstallationStatus
+
+- name: purge old docker packages
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - docker
+    - docker-common
+    - container-selinux
+    - docker-selinux
+    - docker-engine
+  when: dockerInstallationStatus.stat.exists == false
+
+- name: install requirements
+  yum:
+    name: "{{ item }}"
+    update_cache: yes
+  with_items:
+    - device-mapper-persistent-data
+    - lvm2
+  when: dockerInstallationStatus.stat.exists == false
+
+- name: add docker-engine repository (centos7)
+  yum_repository:
+    name: docker-engine
+    description: Docker Repository
+    baseurl: "http://mirror.centos.org/centos/7/extras/x86_64/Packages/docker-common-1.12.6-32.git88a4867.el7.centos.x86_64.rpm"
+    gpgcheck: no
+    enabled: yes
+    file: docker
+  when: dockerInstallationStatus.stat.exists == false
+
+- name: install docker-engine
+  yum:
+    name: docker
+    update_cache: yes
+  become: true
+
+- name: start docker service
+  service:
+    name: docker
+    enabled: yes
+    state: started
+  when: ansible_virtualization_type != "docker" # don't start docker in docker
+
+- name: create docker config dir
+  file:
+    path: /etc/docker
+    state: directory
+  when: dockerInstallationStatus.stat.exists == false

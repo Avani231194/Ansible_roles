@@ -1,0 +1,8 @@
+[mysql-replication]
+#192.168.33.22 ansible_user=root # master
+#192.168.33.21 ansible_user=root #slave
+
+
+
+
+

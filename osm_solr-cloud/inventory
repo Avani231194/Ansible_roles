@@ -1,0 +1,8 @@
+[solr]
+192.168.33.21
+192.168.33.27
+192.168.33.72
+
+[zookeeper]
+zookeeper-0 zookeeper_id=0
+zookeeper-1 zookeeper_id=1

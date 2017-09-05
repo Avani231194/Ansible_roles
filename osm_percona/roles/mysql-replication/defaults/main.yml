@@ -1,0 +1,7 @@
+---
+# defaults file for mysql
+mysql_root_password: reallylongpassword
+master_db_name: salve
+user_name: slave
+password: password
+master_ip: 192.168.33.22

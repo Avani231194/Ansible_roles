@@ -1,0 +1,28 @@
+---
+
+- name: Create virtual env for admin_python
+  command: virtualenv env chdir=/home/{{ item }}/{{ item }}
+  become: yes 
+  become_user: "{{ item }}"
+  with_items:
+     - admin_python
+     - doctor_python
+     - businessapi
+     - doctorapi
+     - business_python
+     - userapi
+
+- name: Installing required python packages in virtualenv 
+  pip:    
+    requirements: /home/{{ item }}/{{ item }}/requirements.txt    
+    virtualenv: /home/{{ item }}/{{ item }}/env 
+  become: yes  
+  become_user: "{{ item }}"
+  with_items:
+     - admin_python
+     - doctor_python
+     - businessapi
+     - doctorapi
+     - business_python
+     - userapi
+

@@ -1,0 +1,9 @@
+
+---
+
+#master_ip: master-controller
+#minion_ip: '{{ ansible_eth1["ipv4"]["address"] }}'
+flanneld_template: flanneld.j2
+kubernetes_config_template: config.j2
+minion_kubelet_template: kubelet.j2
+

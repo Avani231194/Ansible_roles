@@ -1,0 +1,59 @@
+#!/bin/bash
+echo -e "Restarting old running instancees of apps\n"
+
+	echo "Stoping admin_python\n"
+	echo -e "Stopping process pid `ps -ef | grep "/home/admin_python/admin_python/env/bin/python manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+	ps -ef | grep "runserver 0.0.0.0:8000" |grep -v grep | awk {'print $2'} | xargs kill -9
+	echo -e "Stoping doctorapi\n"
+	echo -e "Stopping process pid `ps -ef | grep "python manage.py runserver 0.0.0.0:8400" |grep -v grep | awk {'print $2'}`\n"
+	ps -ef | grep "runserver 0.0.0.0:8400" |grep -v grep | awk {'print $2'} | xargs kill -9
+	echo -e "Stoping doctor_python\n"
+	echo -e "Stopping process pid `ps -ef | grep "python manage.py runserver 0.0.0.0:8500" |grep -v grep | awk {'print $2'}`\n"
+	ps -ef | grep "runserver 0.0.0.0:8500" |grep -v grep | awk {'print $2'} | xargs kill -9
+	echo -e "Stoping userapi\n"
+	echo -e "Stopping process pid `ps -ef | grep "/home/userapi/userapi/env/bin/python manage.py runserver 0.0.0.0:8300" |grep -v grep | awk {'print $2'}`\n"
+	ps -ef | grep "runserver 0.0.0.0:8300" |grep -v grep | awk {'print $2'} | xargs kill -9
+	
+	echo "Stopping businessapi\n"
+	echo -e "Stopping process pid `ps -ef | grep "python /home/businessapi/businessapi/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"    
+	kill -9 `ps -ef | grep "python /home/businessapi/businessapi/manage.py runserver"  | grep -v grep | awk {'print $2'}`
+
+	echo "Stopping business_python\n"
+	echo -e "Stopping process pid `ps -ef | grep "/home/business_python/business_python/env/bin/python manage.py runserver"  |grep -v grep | awk {'print $2'}`\n"
+	kill -9 `ps -ef | grep "/home/business_python/business_python/env/bin/python manage.py runserver" |grep -v grep | awk {'print $2'}`
+
+	
+	#echo "Stopping Celery workers\n"
+	#ps -ef | grep " /home/admin_python/admin_python/env/bin/python /home/admin_python/admin_python/env/bin/celery -A admin_python worker" |grep -v grep awk {'print $2'} | xargs kill -9 
+	#echo "Stopping celery flower\n"
+	#ps -ef | grep "celery -A admin_python flower" |grep -v grep | awk {'print $2'} | xargs kill -9
+
+	cd /home/admin_python/admin_python/
+	source /home/admin_python/admin_python/env/bin/activate
+	echo -e "\nStarting new instance of app"
+	nohup python /home/admin_python/admin_python/manage.py runserver 0.0.0.0:8000 &
+	#nohup celery -A admin_python worker -l info -P processes -c 20 &
+	#nohup celery -A admin_python flower
+	cd /home/doctorapi/doctorapi
+	source /home/doctorapi/doctorapi/env/bin/activate
+	echo -e "\nStarting new instance of app"
+	nohup python /home/doctorapi/doctorapi/manage.py runserver 0.0.0.0:8400 &
+	cd /home/doctor_python/doctor_python/
+	source /home/doctor_python/doctor_python/env/bin/activate
+	echo -e "\nStarting new instance of app"
+	nohup python /home/doctor_python/doctor_python/manage.py runserver 0.0.0.0:8500 &
+	cd /home/userapi/userapi
+	source /home/userapi/userapi/env/bin/activate
+	echo -e "\nStarting new instance of app"
+	nohup python /home/userapi/userapi/manage.py runserver 0.0.0.0:8300 &
+	cd /home/business_python/business_python
+	source /home/business_python/business_python/env/bin/activate
+	echo -e "\nStarting new instance of app"
+        cd /home/business_python/business_python
+        source /home/business_python/business_python/env/bin/activate
+        echo -e "\nStarting new instance of app"
+        nohup python /home/business_python/business_python/manage.py runserver 0.0.0.0:9100 &
+        cd /home/businessapi/businessapi
+        source /home/businessapi/businessapi/env/bin/activate
+        echo -e "\nStarting new instance of app"
+        nohup python /home/businessapi/businessapi/manage.py runserver 0.0.0.0:9000 &

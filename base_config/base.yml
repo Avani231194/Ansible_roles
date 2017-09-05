@@ -1,0 +1,9 @@
+---
+
+- hosts: '{{target}}'
+  sudo: yes
+  roles:
+    - ntp
+    - timezone
+    - hostname
+    - ssh

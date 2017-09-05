@@ -1,0 +1,19 @@
+---
+
+grafana_plugins_path: /var/lib/grafana/plugins
+grafana_template: grafana.ini.j2
+app_mode_name: production
+grafana_data_path: /var/lib/grafana
+grafana_log_path: /var/log/grafana
+server_protocol: http
+http_port: 3000
+domain_name: localhost
+grafana_root_url: http://localhost:3000
+db_type: mysql
+db_host: 127.0.0.1:3306
+db_name: grafana
+db_user: root
+session_life_time: 86400
+admin_username: admin
+admin_password: admin
+secret_key: SW2YcwTIb9zpOOhoPsMm

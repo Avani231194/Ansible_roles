@@ -1,0 +1,8 @@
+[etcd:children]
+master
+minion
+
+[master]
+192.168.33.108
+[minion]
+192.168.33.42

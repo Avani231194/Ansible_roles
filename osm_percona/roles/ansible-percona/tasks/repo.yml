@@ -1,0 +1,18 @@
+---
+# file: tasks/repo.tml
+
+- name: Obtaining percona public key
+  apt_key: keyserver="keyserver.ubuntu.com" id="8507EFA5" state=present
+          state=present
+
+- name: Adding percona repository
+  apt_repository: repo='deb http://repo.percona.com/apt trusty main'
+          state=present
+
+- name: Adding percona source repository
+  apt_repository: repo='deb-src http://repo.percona.com/apt trusty main'
+          state=present
+
+- name: Update apt cache
+  apt: update_cache=yes
+

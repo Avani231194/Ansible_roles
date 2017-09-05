@@ -1,0 +1,23 @@
+---
+
+- name: Installing kubernates on master ...
+  yum: name={{ item }} state=installed
+  with_items:
+      - kubernetes
+      - bridge-utils
+
+- name: Adding kubernetes apiserver file ...
+  template: src=apiserver.j2 dest=/etc/kubernetes/apiserver
+#  notify: Restarting kube-apiserver
+
+- name: Adding kubernetes apiserver file ...
+  template: src=config.j2 dest=/etc/kubernetes/config
+
+- name: Restarting  kube-apiserver
+  service: name=kube-apiserver state=restarted
+
+- name: Restarting  kube-controller-manager
+  service: name=kube-controller-manager state=restarted
+
+- name: Restarting kube-scheduler
+  service: name=kube-scheduler state=restarted

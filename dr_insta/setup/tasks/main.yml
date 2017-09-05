@@ -1,0 +1,48 @@
+---
+# tasks file for doctorinsta.infra
+- name: Updating cache ...
+  yum: name=* state=latest
+
+- name: Installing apache ...
+  yum: name=httpd24 state=latest
+
+- name: Starting apache ...
+  service: name=httpd state=started
+
+- name: Installing php and dependent php modules ...
+  yum: name=php54 state=present 
+
+- name: Installing dependent php modules
+  yum: name={{ item }} state=present
+  with_items:
+      - libevent-devel
+      - libjpeg-devel
+      - mysql-devel
+      - gcc
+      - git
+      - python27-devel
+      - mysql56
+      - php54-devel
+      - php54-cli
+      - php54-pecl-apc
+      - php54-pdo
+      - php54-xml
+      - php54-gd
+      - php54-mysqlnd
+      - php54-mbstring
+      - php54-mcrypt
+      - MySQL-python
+
+- name: Installing pip ...
+  yum: name=python-pip state=present
+
+- name: Installing Virtualenv ...
+  pip: name=virtualenv
+
+- name: Installing mysql-server
+  yum: name=mysql56-server state=present
+
+- name: Start mysql service
+  service: name=mysqld state=started
+
+- include: mysql_secure_installation.yml

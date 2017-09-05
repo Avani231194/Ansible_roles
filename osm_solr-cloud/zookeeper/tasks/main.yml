@@ -1,0 +1,76 @@
+---
+# tasks file for zookeeper
+- name: Include OS family specific variables
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Create the zookeeper group
+  group: name=zookeeper state=present system=yes
+
+- name: Create the zookeeper user
+  user: name=zookeeper groups=zookeeper append=yes
+
+- name: Check if the version of Zookeeper already exists
+  stat: path={{ solr_extract_home }}-{{ zookeeper_version }}
+  register: zookeeper_path
+
+- name: Download Zookeeper
+  get_url: url=http://archive.apache.org/dist/zookeeper/zookeeper-{{ zookeeper_version }}/zookeeper-{{ zookeeper_version }}.tar.gz dest=/tmp/zookeeper-{{ zookeeper_version }}.tar.gz
+  when: zookeeper_path.stat.exists == False
+
+- name: Extract Zookeeper
+  unarchive: src=/tmp/zookeeper-{{ zookeeper_version }}.tar.gz dest={{ extract_home }} copy=no owner=zookeeper group=zookeeper 
+  when: zookeeper_path.stat.exists == False
+
+- name: Create a symlink 
+  file: src=/opt/zookeeper-{{ zookeeper_version }} dest={{ solr_extract_home }} owner=zookeeper group=zookeeper state=link
+  when: zookeeper_path.stat.exists == False
+
+- name: Create the Zookeeper config file
+  template: src=zoo.cfg.j2 dest={{ solr_extract_home }}/conf/zoo.cfg owner=zookeeper group=zookeeper mode=0644
+  notify: restart zookeeper
+
+- name: Create the Zookeeper service file
+  template: src=zookeeper.service.j2 dest=/etc/init.d/zookeeper owner=root group=root mode=0755
+  when: zookeeper_path.stat.exists == False
+
+
+- name: Create the Zookeeper data dir
+  file: path={{ zookeeper_data_dir }} state=directory owner=zookeeper group=zookeeper mode=0755
+
+- name: Create the Zookeeper the myid file
+  template: src=myid.j2 dest={{ zookeeper_data_dir}}/myid owner=zookeeper group=zookeeper mode=0644
+  notify: restart zookeeper
+
+- name: Download and install yum packages
+  yum: name={{ item }} state=installed
+  with_items: "{{ zookeeper_packages }}"
+  when: ansible_os_family == "RedHat"
+
+- name: Download and install apt-get packages 
+  apt: name={{ item }} state=installed
+  with_items: "{{ zookeeper_packages }}"
+  when: ansible_os_family == "Debian"
+
+- name: Set the service_control fact to False
+  set_fact: service_control=True
+
+- name: Change the service_control fact to True
+  set_fact: service_control=True
+  tags:
+     - service
+
+- name: Create the Zookeeper systemd environment file
+  template: src=zookeeper.defaults.j2 dest={{ zookeeper_environment_filename }} owner=zookeeper group=zookeeper mode=0644
+  tags:
+     - service
+
+- name: Create the Zookeeper systemd service file
+  template: src=zookeeper.service.j2 dest=/etc/systemd/system/zookeeper.service owner=zookeeper group=zookeeper mode=0644
+  tags:
+     - service
+
+- name: Ensure Zookeeper is started and enabled on boot
+  service: name=zookeeper state=started enabled=yes
+  tags:
+     - service
+  ignore_errors: yes

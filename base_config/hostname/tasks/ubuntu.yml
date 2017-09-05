@@ -1,0 +1,2 @@
+- name: Update /etc/hostname file
+  lineinfile: dest=/etc/hostname regexp=.* line={{hostname}} create=yes

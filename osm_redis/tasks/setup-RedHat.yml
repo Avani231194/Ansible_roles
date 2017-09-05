@@ -1,0 +1,52 @@
+---
+
+
+- name: get present working directory
+  shell: pwd
+  register: present_directory
+
+- name: Download the noarch rpm package of redis
+  get_url:
+    url: http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+    dest: "{{ present_directory.stdout }}"
+  become: true
+
+- name: Run the command to make the rpm package run
+  yum:
+    name: epel-release-7-10.noarch.rpm
+    state: present
+  become: true
+
+- name: Install Redis onto the server
+  yum:
+    name: redis
+    state: present
+  become: true
+
+- name: Copy the Master Configuration file into the master server
+  template:
+    src: "{{ master_redis_template }}"
+    dest: /etc/redis.conf
+  become: true
+  when: inventory_hostname == groups['nodes'][0]
+
+- name: Copy the Slave Configuration file into the slaves
+  template:
+    src: "{{ slave_redis_template }}"
+    dest: /etc/redis.conf
+  become: true
+  when: inventory_hostname != groups['nodes'][0]
+  tags: slave_config
+
+- name: start the redis server on RedHat
+  systemd:
+    name: redis
+    state: started
+    daemon_reload: yes
+  become: true
+  when: ansible_os_family == 'RedHat'
+
+#- name: check if redis is running good
+#  shell: "redis-benchmark -q -n 1000 -c 10 -P 5"
+#  become: true
+ 

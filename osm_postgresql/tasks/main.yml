@@ -1,0 +1,51 @@
+---
+# tasks file for Postgresql
+
+- name: Install Postgresql in Ubuntu 
+  apt: name={{item}} state=latest update_cache=yes
+  with_items:
+       - postgresql
+       - postgresql-contrib
+  notify: Start Postgresql in Debian
+  when: ansible_distribution == "Ubuntu"
+  
+- name: Install Postgresql Repos in Centos6
+  yum: 
+   name: https://download.postgresql.org/pub/repos/yum/{{ version}}/redhat/rhel-6-{{architecuture}}/pgdg-centos96-{{version}}-3.noarch.rpm
+   state: installed
+   update_cache: true
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+
+- name: Install Postgresql in Centos6-Server
+  yum:
+   name: postgresql96-server
+   state: latest
+   update_cache: yes
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+  
+- name: Initialize Postgresql in Centos6
+  command: service postgresql-9.6 initdb
+  notify:
+     - Start postgresql in centos
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+
+- name: Install Postgresql in Centos7-Server
+  yum: name={{item}} state=latest update_cache=yes
+  with_items:
+       - postgresql-server
+       - postgresql-contrib
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+- name: Cleaning Data Directory for Postgresql in Centos7
+  shell: rm -rf /var/lib/pgsql/9.6/data/*
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+- name: Initialize Postgresql in Centos7
+  command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
+  notify:
+     - Start postgresql in centos
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+ 
+
+ 
+

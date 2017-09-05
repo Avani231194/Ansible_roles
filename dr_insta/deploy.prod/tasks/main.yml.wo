@@ -1,0 +1,50 @@
+---
+# Deployment task for doctorinsta
+- name: Cleaning Old Backup ...
+  command: rm -rf /home/userapi/userapi.bak warn=no
+
+- name: Creating Backup of the latest running code in prod
+  command: mv  /home/userapi/userapi /home/userapi/userapi.bak warn=no
+
+- name: Changing Ownership of backup
+  file: path=/home/userapi/userapi.bak owner=userapi group=userapi recurse=yes
+
+- name: Cloning latest code for userapi
+#  local_action: shell git clone --depth=1 gitolite3:userapi.git chdir= /home/userapi/
+#  command: cd /home/userapi
+  command: git clone gitolite3:userapi
+  become: yes
+  become_user: userapi
+
+- name: Create virtual env for userapi
+  command: virtualenv env chdir=/home/userapi/userapi
+  become: yes 
+  become_user: "userapi"
+  tags: 
+    - webapp_angular
+
+- name: Installing required python packages in virtualenv 
+  pip:    
+    requirements: /home/userapi/userapi/requirements.txt    
+    virtualenv: /home/userapi/userapi/env 
+  become: yes  
+  become_user: "userapi"
+  tags:
+    - webapp_angular
+#- name: Syncing new code to runing code
+#  synchronize:
+#    src: /home/userapi/userapi.bak
+#    dest: /home/userapi/userapi/
+- name: sync
+  command: rsync -r /home/userapi/userapi.bak/ /home/userapi/userapi/
+
+- name: Setting ownership for latest code 
+  file: path=/home/userapi/userapi owner=userapi group=userapi recurse=yes
+
+#- file: path=/home/userapi/userapi mode=0777 recurse=yes
+#  when: userapi=="userapi"
+
+- name: Starting userapi
+  service: name=userapi state=started
+  tags:
+    - webapp_angular

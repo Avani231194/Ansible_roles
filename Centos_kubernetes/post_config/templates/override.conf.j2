@@ -1,0 +1,7 @@
+[Service]
+EnvironmentFile=/var/run/flannel/docker
+ExecStart=
+ExecStart=/usr/bin/docker daemon \
+     ${DOCKER_OPT_BIP} \
+         ${DOCKER_OPT_IPMASQ} \
+         ${DOCKER_OPT_MTU}

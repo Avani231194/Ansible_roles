@@ -1,0 +1,81 @@
+---
+
+# check whether java is installed
+- name: determine if Java is already installed
+  shell: which java
+  register: java_task_installed
+  changed_when: java_task_installed.rc != 0
+  failed_when: no
+
+# install java kit
+- name: Ensure Java Development Kit is Installed
+  become: true
+  yum: pkg=java-1.7.0-openjdk-devel state=installed
+  tags: java_installation
+
+# make a tomcat group and user as we want non root user to be owner of tomcat
+- name: make a tomcat group
+  group:
+    name: tomcat
+    state: present
+  tags: tomcat_group
+
+- name: create a tomcat user for above group
+  user:
+    name="tomcat"
+    shell=/bin/false
+    groups=tomcat
+    append=yes
+  become: true
+  tags: tomcat_user
+  
+- name: get the java_path
+  shell: sudo update-java-alternatives -l | awk '{print $3}'
+  register: java_path
+  tags: getting_java_home
+
+- name: Install Tomcat 7 onto the server
+  yum:
+   name: tomcat
+   state: present
+  become: true
+
+- name: add a line in tomcat.conf file
+  lineinfile:
+    dest: /usr/share/tomcat/conf/tomcat.conf
+    line: 'JAVA_OPTS="-Djava.security.egd=file:/dev/./urandom -Djava.awt.headless=true -Xmx512m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC"'
+    mode: 0775
+  become: true
+
+- name: Install Admin Packages
+  yum:
+   name: "{{ item }}"
+   state: present
+  become: true
+  with_items:
+   - tomcat-webapps
+   - tomcat-admin-webapps
+   - tomcat-docs-webapp
+   - tomcat-javadoc
+
+# copy tomcat server.xml file
+- name: copy the tomcat server file
+  template:
+    src: "{{ server }}"
+    dest: /etc/tomcat/
+    owner: tomcat
+    group: tomcat
+  become: true
+  tags: copying_server_xml
+
+# copy tomcat user.xml file
+- name: copy the tomcat users file
+  template:
+    src: "{{ tomcat_users }}"
+    dest: /etc/tomcat/
+    owner: tomcat
+    group: tomcat
+  become: true
+  notify:
+   - start_tomcat_redhat
+  tags: copying_user_xml

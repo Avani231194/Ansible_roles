@@ -1,0 +1,6 @@
+---
+# vars file for Postgresql
+
+version: 9.6
+architecuture: x86_64
+

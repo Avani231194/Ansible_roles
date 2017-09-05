@@ -1,0 +1,8 @@
+---
+# defaults file for kubernetes_master
+
+#kube_master_ip: '{{ ansible_eth1["ipv4"]["address"] }}'
+master_config_file: master_config.j2
+master_api_server_file: apiserver.j2
+etcd_config_template: etcd.conf.j2
+flanneld_config_template: flanneld.j2

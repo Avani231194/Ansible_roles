@@ -1,0 +1,28 @@
+---
+
+- name: copy rpm repo to repo list from files
+  copy: src=grafana.repo dest=/etc/yum.repos.d/grafana.repo owner=root group=grafana mode=0775
+  become: true
+
+- name: install grafana from the repo added
+  yum:
+   name: grafana
+   state: installed
+  become: true
+
+- name: install initscripts
+  yum: pkg=initscripts state=present
+  become: true
+
+- name: install fontconfig
+  yum: pkg=fontconfig state=present
+  become: true
+
+- name: Start Grafana Server
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: grafana-server
+    enabled: yes
+
+

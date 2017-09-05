@@ -1,0 +1,36 @@
+---
+
+- name: get the directory
+  shell: "pwd"
+  register: directory
+
+- name: Get the source list for Grafana into sources.list file
+  get_url:
+    url: "https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana_4.4.1_amd64.deb"
+    dest: "{{ directory.stdout }}"
+  become: true
+
+- name: update cache for Elastic search to be installed
+  apt:
+    update_cache: yes
+    cache_valid_time: 88990070
+  become: true
+
+- name: Install Grafana from source.list
+  shell: "dpkg -i grafana_4.4.1_amd64.deb"
+  become: true
+
+- name: Install apt-transport-https
+  apt: name=apt-transport-https state=present
+  become: true
+
+- name: start Grafana Service
+  service: name=grafana-server state=started enabled=yes
+  become: true
+
+- name: update the Grafana service
+  shell: "update-rc.d grafana-server defaults"
+  become: true
+
+
+

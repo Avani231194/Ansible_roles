@@ -1,0 +1,82 @@
+---
+
+
+- name: Update the cache.........
+  apt:
+    update_cache: yes
+
+- name: Installing zabbix server dependencies ...
+  apt: name={{ item }} state=installed
+  with_items:
+      - apache2
+      - mysql-server
+      - php5
+      - php5-cli 
+      - php5-common 
+      - php5-mysql
+      - python-mysqldb
+
+- name: Starting Apache server
+  service: name=apache2 state=started
+
+- name: Starting mysql database
+  service: name=mysql state=started
+
+- name: Configuring mysql
+  include: mysql_secure_installation.yml
+
+- name: Installing zabbix server rpm package
+  shell: "wget http://repo.zabbix.com/zabbix/3.0/ubuntu/pool/main/z/zabbix-release/zabbix-release_3.0-1+trusty_all.deb"
+
+- name: dpkg packages
+  command: dpkg -i zabbix-release_3.0-1+trusty_all.deb
+
+- name: Update the cache............
+  apt:
+    update_cache: yes
+
+
+- name: Installing zabbix dependencies and relative packages
+  apt: name={{ item }}  state=present
+  with_items:
+      - zabbix-server-mysql
+      - zabbix-agent 
+      - zabbix-frontend-php
+
+- name: Create DB (if necessary)
+  mysql_db:
+    name={{ zabbix_db_name }}
+    state=present
+  register: db_created
+
+- name: Import DB (if it was created)
+  mysql_db:
+    name={{ zabbix_db_name }}
+    state=import
+    target=/usr/share/doc/zabbix-server-mysql/create.sql.gz
+  when: db_created.changed
+
+  
+- name: Mysql Configuration
+  command: 'mysql -u root -p{{ mysql_root_password }} -e "{{ item }}"'
+  with_items:
+    - GRANT ALL on {{ zabbix_db_name }}.* to zabbix@localhost IDENTIFIED BY '{{ zabbix_db_password }}';
+    - GRANT ALL PRIVILEGES on {{ zabbix_db_name }}.* to {{ zabbix_db_user_name }}@localhost IDENTIFIED BY '{{ zabbix_db_password }}';
+    - GRANT ALL PRIVILEGES on {{ zabbix_db_name }}.* to {{ zabbix_db_user_name }}@'%' IDENTIFIED BY '{{ zabbix_db_password }}';
+    - FLUSH PRIVILEGES;
+
+
+- name: Adding zabbix configuration file ...
+  template: src=zabbix-server.conf.j2 dest=/etc/zabbix/zabbix_server.conf owner=root group=zabbix mode=0640
+
+- name: Configuring zabbix ui part ...
+  template: src=zabbix.conf.php.j2 dest=/etc/zabbix/web/zabbix.conf.php owner=www-data group=www-data mode=0644
+  notify: zabbix-server restart
+
+- name: php configuration file  ...
+  template: src=php.ini.j2 dest=/etc/php5/apache2/php.ini
+
+- include: zabbix_agent.yml 
+
+- name: Restarting apapche
+  service: name=apache2 state=restarted

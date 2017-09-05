@@ -1,0 +1,8 @@
+---
+# vars file for kubernetes_master
+
+#kube_master_ip: '{{ ansible_eth1["ipv4"]["address"] }}'
+master_hostname: "master"
+minion_hostname: "minion"
+master_ip: "master"
+minion_ip: "minion"

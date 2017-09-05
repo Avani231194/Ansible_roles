@@ -1,0 +1,34 @@
+#!/bin/sh
+SERVICE_NAME=admin_python
+
+case $1 in
+      start)
+         echo "Starting $SERVICE_NAME....."
+        cd /home/admin_python/admin_python/
+        source /home/admin_python/admin_python/env/bin/activate
+        nohup python /home/admin_python/admin_python/manage.py runserver 0.0.0.0:8000 &
+        echo -ne '\n'| echo "Service is Running"
+        echo -ne '\n'| echo "Completed"
+   exit 0
+    ;;
+
+      stop)
+        echo -e "Stopping process pid `ps -ef | grep "python /home/admin_python/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/admin_python/admin_python/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        echo "Stoping $SERVICE_NAME"
+      ;;
+
+     restart)
+
+        echo "Stop admin_python"
+        echo -e "Stopping process pid `ps -ef | grep "python /home/admin_python/manage.py runserver" |grep -v grep | awk {'print $2'}`\n"
+        ps -ef | grep "python /home/admin_python/admin_python/manage.py runserver" |grep -v grep | awk {'print $2'} | xargs kill -9
+        cd /home/admin_python/admin_python/
+        source /home/admin_python/admin_python/env/bin/activate
+        echo -e "Starting admin_python"
+        nohup python /home/admin_python/admin_python/manage.py runserver 0.0.0.0:8000 &
+        echo -ne '\n'| echo "Restarting"
+        echo -ne '\n'| echo "Completed" 
+     ;; 
+esac
+

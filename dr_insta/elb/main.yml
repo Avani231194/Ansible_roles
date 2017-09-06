@@ -9,8 +9,8 @@
       local_action:
         module: ec2_elb
         instance_id: "{{ ansible_ec2_instance_id }}"
-        aws_access_key: AKIAIZB5ZPURHRZQB4CQ
-        aws_secret_key: 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
+        aws_access_key: 
+        aws_secret_key:
   #      instance_id: i-0db4a52644953a5ff     
         region: "us-east-1"
         state: absent
@@ -32,8 +32,8 @@
 #      local_action:
 #        module: ec2_elb
 #        instance_id: "{{ ansible_ec2_instance_id }}"
-#        aws_access_key: AKIAIZB5ZPURHRZQB4CQ
-#        aws_secret_key: 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
+#        aws_access_key:
+#        aws_secret_key: 
 #      instance_id: i-0db4a52644953a5ff       
 #        ec2_elbs: app-elb
 #        region: "us-east-1"
